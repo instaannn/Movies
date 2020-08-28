@@ -12,11 +12,15 @@ import UIKit
 
 final class MoviesViewController: UIViewController {
     
+    // MARK: - Public properties
+    
+    var coordinator: Coordinator?
+    
     // MARK: - Private properties
     
     private lazy var results = Results()
     private lazy var moviesTableView = UITableView()
-
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -25,7 +29,7 @@ final class MoviesViewController: UIViewController {
         downloadJson()
         setupVies()
         
-  }
+    }
 }
 
 //MARK: - downloadJson
@@ -75,7 +79,6 @@ private extension MoviesViewController {
     func setupTableView() {
         moviesTableView.delegate = self
         moviesTableView.dataSource = self
-//        moviesTableView.estimatedRowHeight = 150
         moviesTableView.rowHeight = UITableView.automaticDimension
         moviesTableView.register(MovieTableViewCell.self, forCellReuseIdentifier: Cells.movieCell)
         
@@ -100,6 +103,10 @@ extension MoviesViewController: UITableViewDataSource {
         let movie = results.results![indexPath.row]
         cell.set(movie: movie)
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        coordinator?.goToMovieDetailViewController()
     }
 }
 

@@ -28,10 +28,16 @@ final class Coordinator: ICoordinator {
         goToMoviesViewController()
     }
     
+    func goToMovieDetailViewController() {
+        let viewController = MovieDetailViewController()
+        navigationController.pushViewController(viewController, animated: true)
+    }
+    
     // MARK: - Private methods
     
     private func goToMoviesViewController() {
         let viewController = MoviesViewController()
+        viewController.coordinator = self
         navigationController.pushViewController(viewController, animated: true)
     }
 }

@@ -17,6 +17,7 @@
 		8507FFD724F676500051F265 /* MoviesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8507FFD624F676500051F265 /* MoviesModel.swift */; };
 		8507FFD924F67EC10051F265 /* MovieTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8507FFD824F67EC10051F265 /* MovieTableViewCell.swift */; };
 		8507FFDC24F79E0A0051F265 /* UIImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8507FFDB24F79E0A0051F265 /* UIImageView.swift */; };
+		85AA8DF024F983EC0064EA4D /* MovieDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AA8DEF24F983EC0064EA4D /* MovieDetailViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		8507FFD624F676500051F265 /* MoviesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviesModel.swift; sourceTree = "<group>"; };
 		8507FFD824F67EC10051F265 /* MovieTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieTableViewCell.swift; sourceTree = "<group>"; };
 		8507FFDB24F79E0A0051F265 /* UIImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageView.swift; sourceTree = "<group>"; };
+		85AA8DEF24F983EC0064EA4D /* MovieDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +67,7 @@
 			isa = PBXGroup;
 			children = (
 				8507FFB524F6729E0051F265 /* AppDelegate.swift */,
+				85AA8DEB24F983AA0064EA4D /* MovieDetailViewController */,
 				8507FFD224F675CE0051F265 /* MoviesViewController */,
 				8507FFCD24F673B70051F265 /* Coordinator */,
 				8507FFCC24F673AA0051F265 /* Storyboard */,
@@ -151,6 +154,38 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		85AA8DEB24F983AA0064EA4D /* MovieDetailViewController */ = {
+			isa = PBXGroup;
+			children = (
+				85AA8DEE24F983CA0064EA4D /* ViewController */,
+				85AA8DED24F983C50064EA4D /* View */,
+				85AA8DEC24F983BD0064EA4D /* Model */,
+			);
+			path = MovieDetailViewController;
+			sourceTree = "<group>";
+		};
+		85AA8DEC24F983BD0064EA4D /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		85AA8DED24F983C50064EA4D /* View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		85AA8DEE24F983CA0064EA4D /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				85AA8DEF24F983EC0064EA4D /* MovieDetailViewController.swift */,
+			);
+			path = ViewController;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -226,6 +261,7 @@
 				8507FFD124F673E10051F265 /* Coordinator.swift in Sources */,
 				8507FFDC24F79E0A0051F265 /* UIImageView.swift in Sources */,
 				8507FFD924F67EC10051F265 /* MovieTableViewCell.swift in Sources */,
+				85AA8DF024F983EC0064EA4D /* MovieDetailViewController.swift in Sources */,
 				8507FFCF24F673D80051F265 /* ICoordinator.swift in Sources */,
 				8507FFBA24F6729E0051F265 /* MoviesViewController.swift in Sources */,
 				8507FFB624F6729E0051F265 /* AppDelegate.swift in Sources */,
