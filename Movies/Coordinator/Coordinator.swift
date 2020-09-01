@@ -28,8 +28,9 @@ final class Coordinator: ICoordinator {
         goToMoviesViewController()
     }
     
-    func goToMovieDetailViewController() {
+    func goToMovieDetailViewController(id: Int) {
         let viewController = MovieDetailViewController()
+        viewController.selectIdTwo = id
         navigationController.pushViewController(viewController, animated: true)
     }
     

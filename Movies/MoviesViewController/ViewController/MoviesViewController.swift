@@ -15,6 +15,7 @@ final class MoviesViewController: UIViewController {
     // MARK: - Public properties
     
     var coordinator: Coordinator?
+    public var selectIdOne: Int?
     
     // MARK: - Private properties
     
@@ -28,7 +29,6 @@ final class MoviesViewController: UIViewController {
         
         downloadJson()
         setupVies()
-        
     }
 }
 
@@ -51,7 +51,7 @@ private extension MoviesViewController {
                 }
                 print(self.results)
             } catch {
-                print("Json Error")
+                print(Constants.jsonError)
             }
         } .resume()
     }
@@ -77,11 +77,12 @@ private extension MoviesViewController {
     }
     
     func setupTableView() {
+        title = "Популярное"
         moviesTableView.delegate = self
         moviesTableView.dataSource = self
         moviesTableView.rowHeight = UITableView.automaticDimension
+        moviesTableView.separatorColor = .clear
         moviesTableView.register(MovieTableViewCell.self, forCellReuseIdentifier: Cells.movieCell)
-        
     }
 }
 
@@ -94,7 +95,7 @@ extension MoviesViewController: UITableViewDelegate {}
 extension MoviesViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return results.results?.count ?? 0
+        return results.results?.count ?? Constants.zero
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -106,7 +107,15 @@ extension MoviesViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        coordinator?.goToMovieDetailViewController()
+        guard let id = results.results?[indexPath.row].id else { return }
+        selectIdOne = id
+        coordinator?.goToMovieDetailViewController(id: selectIdOne ?? Constants.zero)
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.contentView.layer.masksToBounds = true
+        let radius = cell.contentView.layer.cornerRadius
+        cell.layer.shadowPath = UIBezierPath(roundedRect: cell.bounds, cornerRadius: radius).cgPath
     }
 }
 
@@ -133,12 +142,17 @@ private extension MoviesViewController {
 
 private extension MoviesViewController {
     
+    enum Constants {
+        static let zero: Int = 0
+        static let jsonError: String = "Json Error"
+    }
+    
     enum UrlString {
-        static let urlString = "https://api.themoviedb.org/3/movie/popular?api_key=799ad00db48f25949a3aaea920d756d6"
+        static let urlString: String = "https://api.themoviedb.org/3/movie/popular?api_key=799ad00db48f25949a3aaea920d756d6"
     }
     
     enum Cells {
-        static let movieCell = "movieCell"
+        static let movieCell: String = "movieCell"
     }
     
 }
