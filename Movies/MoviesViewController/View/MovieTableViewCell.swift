@@ -104,8 +104,8 @@ final class MovieTableViewCell: UITableViewCell {
     
     private func configureTitleLabel() {
         titleLabel.numberOfLines = 0
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 28)
-        titleLabel.lineBreakMode = .byClipping
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 35)
+        titleLabel.adjustsFontSizeToFitWidth = true
         titleLabel.textColor = UIColor.black
         titleLabel.textAlignment = .left
     }
