@@ -15,7 +15,7 @@ struct MovieDetail: Decodable {
     var release_date: String?
     var poster_path: String?
     var runtime: Int?
-    var genres: Genres?
+    var genres: [Genres]?
 }
 
 struct Genres: Decodable {

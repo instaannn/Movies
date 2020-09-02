@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SafariServices
 
 //MARK: - MovieDetailViewController
 
@@ -14,11 +15,12 @@ final class MovieDetailViewController: UIViewController {
     
     // MARK: - Public properties
     
-    public var selectIdTwo = Int()
+    var selectIdTwo = Int()
     
     // MARK: - Private properties
     
     private lazy var movieDetail = MovieDetail()
+    private lazy var trailers = Trailers()
     private lazy var posterBackground = UIImageView()
     private lazy var posterImageView = UIImageView()
     private lazy var titleLabel = UILabel()
@@ -27,14 +29,35 @@ final class MovieDetailViewController: UIViewController {
     private lazy var clockImageView = UIImageView()
     private lazy var runTimeLabel = UILabel()
     private lazy var genresCollectionView = UICollectionView()
+    private lazy var overviewLabel = UILabel()
+    private lazy var trailerButton = UIButton()
+    private lazy var token = Constants.token
     
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        navigationItem.largeTitleDisplayMode = .never
         requestDetails(for: selectIdTwo)
+        requestTrailer(for: selectIdTwo)
+        configureGenresCollectionView()
         setupVies()
+    }
+    
+    @objc
+    private func actionButton() {
+        guard let key = trailers.results?.first?.key else { return }
+        let url = URL(string: "https://www.youtube.com/watch?v=\(key)")
+        
+        if url == nil {
+            let alert = UIAlertController(title: "Oops!", message: "Trailer unavailable", preferredStyle: .alert)
+            let action = UIAlertAction(title: "Ok", style: .cancel, handler: .none)
+            alert.addAction(action)
+            present(alert, animated: true, completion: .none)
+        } else {
+            let vc = SFSafariViewController(url: url!)
+            present(vc, animated: true, completion: .none)
+        }
     }
 }
 
@@ -43,7 +66,6 @@ final class MovieDetailViewController: UIViewController {
 private extension MovieDetailViewController {
     
     func requestDetails(for id: Int) {
-        let token = "799ad00db48f25949a3aaea920d756d6"
         guard let url = URL(string: "https://api.themoviedb.org/3/movie/\(id)?api_key=\(token)") else { return }
         
         let dataTask = URLSession.shared.dataTask(with: url) { [ weak self] (data, response, error)  in
@@ -70,15 +92,42 @@ private extension MovieDetailViewController {
                 self.configureVoteLabel()
                 self.configureClockImageView()
                 self.configureRunTimeLabel()
-                self.configureGenresCollectionView()
+                self.configureOverviewLabel()
+                self.configureTrailerButton()
+                self.genresCollectionView.reloadData()
             }
-            
-            print(movieDetail)
         } catch {
             print("Json Error")
         }
     }
     
+    //MARK: - requestTrailer
+    
+    func requestTrailer(for id: Int) {
+        guard let url = URL(string: "https://api.themoviedb.org/3/movie/\(id)/videos?api_key=\(token)") else { return }
+        
+        let dataTask = URLSession.shared.dataTask(with: url) { [weak self] (data, response, error)  in
+            if let data = data,
+                (response as? HTTPURLResponse)?.statusCode == 200,
+                error == nil {
+                print(data)
+                self?.parseTrailer(from: data)
+            } else {
+                print("Network error")
+            }
+        }
+        dataTask.resume()
+    }
+    
+    func parseTrailer(from data: Data) {
+        do {
+            trailers = try JSONDecoder().decode(Trailers.self, from: data)
+            DispatchQueue.main.async {
+            }
+        } catch {
+            print("Json Error")
+        }
+    }
 }
 
 // MARK: - Setupe
@@ -88,6 +137,7 @@ private extension MovieDetailViewController {
     func setupVies() {
         addVies()
         setView()
+        addActions()
         layout()
     }
 }
@@ -105,16 +155,27 @@ private extension MovieDetailViewController {
         view.addSubview(clockImageView)
         view.addSubview(runTimeLabel)
         view.addSubview(genresCollectionView)
+        view.addSubview(overviewLabel)
+        view.addSubview(trailerButton)
+    }
+    
+    func addActions() {
+        trailerButton.addTarget(self, action: #selector(actionButton), for: .touchUpInside)
     }
     
     func setView() {
         view.backgroundColor = .white
     }
     
-    func configurePosterBackground() {
+    func loadImage() {
         let moviePosterString = "https://image.tmdb.org/t/p/w500" + "\(movieDetail.poster_path ?? "")"
         guard let url = URL(string: moviePosterString) else { return }
         posterBackground.load(url: url)
+        posterImageView.load(url: url)
+    }
+    
+    func configurePosterBackground() {
+        loadImage()
         posterBackground.addBlurEffect()
         
         let path = UIBezierPath(roundedRect: posterBackground.bounds,
@@ -126,9 +187,7 @@ private extension MovieDetailViewController {
     }
     
     func configurePosterImageView() {
-        let moviePosterString = "https://image.tmdb.org/t/p/w500" + "\(movieDetail.poster_path ?? "")"
-        guard let url = URL(string: moviePosterString) else { return }
-        posterImageView.load(url: url)
+        loadImage()
         posterImageView.contentMode = .scaleAspectFill
         posterImageView.layer.cornerRadius = 8
         posterImageView.clipsToBounds = true
@@ -149,13 +208,11 @@ private extension MovieDetailViewController {
     
     func configureVoteLabel() {
         if let voteAverage = movieDetail.vote_average {
+            let average: String = String(format: "%.1f", voteAverage)
+            voteAverageLabel.text = average
             if voteAverage <= 7.0 {
-                let average: String = String(format: "%.1f", voteAverage)
-                voteAverageLabel.text = average
                 voteAverageLabel.textColor = .red
             } else {
-                let average: String = String(format: "%.1f", voteAverage)
-                voteAverageLabel.text = average
                 voteAverageLabel.textColor = .black
             }
         }
@@ -168,10 +225,8 @@ private extension MovieDetailViewController {
     
     func configureRunTimeLabel() {
         guard let time = movieDetail.runtime else { return }
-        
         let hour = time / 60
         let minute = time - (hour * 60)
-        
         runTimeLabel.text = "\(hour)h \(minute)min"
         runTimeLabel.font = UIFont.boldSystemFont(ofSize: 18)
     }
@@ -179,13 +234,31 @@ private extension MovieDetailViewController {
     func configureGenresCollectionView() {
         let flowLayout = ExecutorViewFlowLayout()
         flowLayout.estimatedItemSize = CGSize(width: 1, height: 1)
-        flowLayout.scrollDirection = .horizontal
-        genresCollectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: flowLayout)
-        genresCollectionView.register(GenresCollectionViewCell.self, forCellWithReuseIdentifier: "wordsCell")
+        genresCollectionView = UICollectionView(frame: CGRect.zero,
+                                                collectionViewLayout: flowLayout)
+        genresCollectionView.register(GenresCollectionViewCell.self,
+                                      forCellWithReuseIdentifier: Cells.collectionViewCell)
         genresCollectionView.collectionViewLayout = flowLayout
         genresCollectionView.backgroundColor = UIColor.white
         genresCollectionView.delegate = self
         genresCollectionView.dataSource = self
+    }
+    
+    func configureOverviewLabel() {
+        overviewLabel.text = movieDetail.overview
+        overviewLabel.numberOfLines = 0
+        overviewLabel.adjustsFontSizeToFitWidth = true
+        overviewLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        overviewLabel.textColor = UIColor.gray
+    }
+    
+    func configureTrailerButton() {
+        trailerButton.setTitle("Show trailer", for: .normal)
+        trailerButton.layer.cornerRadius = 8
+        trailerButton.clipsToBounds = true
+        trailerButton.setGradient(colorOne: UIColor(red: 170/255.0, green: 147/255.0, blue: 214/255.0, alpha: 1),
+                                  colorTwo: UIColor(red: 207/255.0, green: 206/255.0, blue: 245/255.0, alpha: 1))
+        trailerButton.setTitleColor(.black, for: .normal)
     }
 }
 
@@ -196,18 +269,19 @@ extension MovieDetailViewController: UICollectionViewDelegate {}
 //MARK: - UICollectionViewDataSource
 
 extension MovieDetailViewController: UICollectionViewDataSource {
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return (movieDetail.genres?.id)!
+        return movieDetail.genres?.count ?? 0
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = genresCollectionView.dequeueReusableCell(withReuseIdentifier: "wordsCell",
-                                                       for: indexPath) as! GenresCollectionViewCell
-//        cell.genresLabel.text = movieDetail.genres![indexPath.row]
-        cell.genresLabel.text = "Ghbdtn"
+    func collectionView(_ collectionView: UICollectionView,
+                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = genresCollectionView.dequeueReusableCell(withReuseIdentifier: Cells.collectionViewCell,
+                                                            for: indexPath) as! GenresCollectionViewCell
+        cell.genresLabel.text = movieDetail.genres![indexPath.row].name
         cell.layer.cornerRadius = 8
         cell.clipsToBounds = true
-        cell.contentView.backgroundColor = UIColor(red: 236/255.0, green: 226/255.0, blue: 221/255.0, alpha: 1)
+        cell.contentView.backgroundColor = UIColor(red: 207/255.0, green: 206/255.0, blue: 245/255.0, alpha: 1)
         return cell
     }
 }
@@ -309,9 +383,55 @@ private extension MovieDetailViewController {
                 equalToConstant: 20)])
         
         genresCollectionView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([genresCollectionView.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-                                     genresCollectionView.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-                                     genresCollectionView.heightAnchor.constraint(equalToConstant: 30),
-                                     genresCollectionView.bottomAnchor.constraint(equalTo: posterImageView.bottomAnchor)])
+        NSLayoutConstraint.activate([
+            genresCollectionView.leadingAnchor.constraint(
+                equalTo: titleLabel.leadingAnchor,
+                constant: -10),
+            genresCollectionView.trailingAnchor.constraint(
+                equalTo: titleLabel.trailingAnchor),
+            genresCollectionView.heightAnchor.constraint(
+                equalToConstant: 30),
+            genresCollectionView.topAnchor.constraint(
+                equalTo: starImageView.bottomAnchor,
+                constant: 10)])
+        
+        overviewLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            overviewLabel.leadingAnchor.constraint(
+                equalTo: posterImageView.leadingAnchor),
+            overviewLabel.trailingAnchor.constraint(
+                equalTo: titleLabel.trailingAnchor),
+            overviewLabel.topAnchor.constraint(
+                equalTo: posterImageView.bottomAnchor,
+                constant: 20),
+            overviewLabel.heightAnchor.constraint(
+                equalToConstant: 150)])
+        
+        trailerButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            trailerButton.topAnchor.constraint(
+                equalTo: overviewLabel.bottomAnchor,
+                constant: 20),
+            trailerButton.leadingAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                constant: 100),
+            trailerButton.trailingAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                constant: -100),
+            trailerButton.heightAnchor.constraint(
+                equalToConstant: 50)])
+    }
+}
+
+//MARK: - Constants
+
+private extension MovieDetailViewController {
+    
+    enum Constants {
+        static let token: String = "799ad00db48f25949a3aaea920d756d6"
+    }
+    
+    enum Cells {
+        static let collectionViewCell: String = "genresCell"
     }
 }

@@ -15,7 +15,7 @@ final class MoviesViewController: UIViewController {
     // MARK: - Public properties
     
     var coordinator: Coordinator?
-    public var selectIdOne: Int?
+    var selectIdOne: Int?
     
     // MARK: - Private properties
     
@@ -64,6 +64,7 @@ private extension MoviesViewController {
     func setupVies() {
         addVies()
         setupTableView()
+        configureNavigationController()
         layout()
     }
 }
@@ -77,12 +78,16 @@ private extension MoviesViewController {
     }
     
     func setupTableView() {
-        title = "Популярное"
         moviesTableView.delegate = self
         moviesTableView.dataSource = self
         moviesTableView.rowHeight = UITableView.automaticDimension
         moviesTableView.separatorColor = .clear
         moviesTableView.register(MovieTableViewCell.self, forCellReuseIdentifier: Cells.movieCell)
+    }
+    
+    func configureNavigationController() {
+        title = Constants.title
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
 }
 
@@ -138,13 +143,14 @@ private extension MoviesViewController {
     }
 }
 
-//MARK: - Enums
+//MARK: - Constants
 
 private extension MoviesViewController {
     
     enum Constants {
         static let zero: Int = 0
         static let jsonError: String = "Json Error"
+        static let title: String = "Популярное"
     }
     
     enum UrlString {
@@ -154,5 +160,4 @@ private extension MoviesViewController {
     enum Cells {
         static let movieCell: String = "movieCell"
     }
-    
 }

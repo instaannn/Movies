@@ -56,13 +56,11 @@ final class MovieTableViewCell: UITableViewCell {
         titleLabel.text = movie.title
         
         if let voteAverage = movie.vote_average {
+            let average: String = String(format: "%.1f", voteAverage)
+            voteAverageLabel.text = average
             if voteAverage <= 7.0 {
-                let average: String = String(format: "%.1f", voteAverage)
-                voteAverageLabel.text = average
                 voteAverageLabel.textColor = .red
             } else {
-                let average: String = String(format: "%.1f", voteAverage)
-                voteAverageLabel.text = average
                 voteAverageLabel.textColor = .black
             }
         }

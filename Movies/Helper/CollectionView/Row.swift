@@ -11,11 +11,22 @@ import UIKit
 //MARK: - Row
 
 final class Row {
+    
+    // MARK: - Public properties
+    
     var attributes = [UICollectionViewLayoutAttributes]()
-    var spacing: CGFloat = 0
+    
+    // MARK: - Private properties
+    
+    private lazy var spacing: CGFloat = 0
+    
+    // MARK: - Init
+    
     init(spacing: CGFloat) {
         self.spacing = spacing
     }
+    
+    // MARK: - Public methods
     
     func add(attribute: UICollectionViewLayoutAttributes) {
         attributes.append(attribute)

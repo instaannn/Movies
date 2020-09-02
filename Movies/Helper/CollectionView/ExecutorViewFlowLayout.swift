@@ -11,6 +11,7 @@ import UIKit
 //MARK: - ExecutorViewFlowLayout
 
 final class ExecutorViewFlowLayout: UICollectionViewFlowLayout {
+    
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         guard let attributes = super.layoutAttributesForElements(in: rect) else {
             return nil

@@ -42,19 +42,20 @@ final class GenresCollectionViewCell: UICollectionViewCell {
         NSLayoutConstraint.activate([
             genresLabel.leadingAnchor.constraint(
                 equalTo: contentView.leadingAnchor,
-                constant: 10),
+                constant: 5),
             genresLabel.trailingAnchor.constraint(
                 equalTo: contentView.trailingAnchor,
-                constant: -10),
+                constant: -5),
             genresLabel.topAnchor.constraint(
                 equalTo: contentView.topAnchor,
-                constant: 10),
+                constant: 5),
             genresLabel.bottomAnchor.constraint(
                 equalTo: contentView.bottomAnchor,
-                constant: -10)])
+                constant: -5)])
         
         genresLabel.textAlignment = .center
-        genresLabel.font = UIFont.italicSystemFont(ofSize: 18)
+        genresLabel.font = UIFont.italicSystemFont(ofSize: 12)
+        genresLabel.adjustsFontSizeToFitWidth = true
         genresLabel.numberOfLines = 0
     }
     
