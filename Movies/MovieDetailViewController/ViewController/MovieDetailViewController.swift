@@ -46,18 +46,16 @@ final class MovieDetailViewController: UIViewController {
     
     @objc
     private func actionButton() {
-        guard let key = trailers.results?.first?.key else { return }
-        let url = URL(string: "https://www.youtube.com/watch?v=\(key)")
-        
-        if url == nil {
-            let alert = UIAlertController(title: "Oops!", message: "Trailer unavailable", preferredStyle: .alert)
-            let action = UIAlertAction(title: "Ok", style: .cancel, handler: .none)
-            alert.addAction(action)
-            present(alert, animated: true, completion: .none)
-        } else {
-            let vc = SFSafariViewController(url: url!)
-            present(vc, animated: true, completion: .none)
+        guard let key = trailers.results?.first?.key,
+            let url = URL(string: "https://www.youtube.com/watch?v=\(key)") else {
+                let alert = UIAlertController(title: "Oops!", message: "Trailer unavailable", preferredStyle: .alert)
+                let action = UIAlertAction(title: "Ok", style: .cancel, handler: .none)
+                alert.addAction(action)
+                present(alert, animated: true, completion: .none)
+                return
         }
+        let vc = SFSafariViewController(url: url)
+        present(vc, animated: true, completion: .none)
     }
 }
 
@@ -276,9 +274,9 @@ extension MovieDetailViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = genresCollectionView.dequeueReusableCell(withReuseIdentifier: Cells.collectionViewCell,
-                                                            for: indexPath) as! GenresCollectionViewCell
-        cell.genresLabel.text = movieDetail.genres![indexPath.row].name
+        guard let cell = genresCollectionView.dequeueReusableCell(withReuseIdentifier: Cells.collectionViewCell,
+                                                                  for: indexPath) as? GenresCollectionViewCell else { return UICollectionViewCell() }
+        cell.genresLabel.text = movieDetail.genres?[indexPath.row].name
         cell.layer.cornerRadius = 8
         cell.clipsToBounds = true
         cell.contentView.backgroundColor = UIColor(red: 207/255.0, green: 206/255.0, blue: 245/255.0, alpha: 1)
