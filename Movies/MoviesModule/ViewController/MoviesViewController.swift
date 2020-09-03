@@ -14,46 +14,42 @@ final class MoviesViewController: UIViewController {
     
     // MARK: - Public properties
     
-    var coordinator: Coordinator?
-    var selectIdOne: Int?
-    
+    public var coordinator: IMoviesCoordinator?
+  
     // MARK: - Private properties
     
     private lazy var results = Results()
     private lazy var moviesTableView = UITableView()
+    private var networkLayer: INetworkLayer?
+    private var selectIdOne: Int?
     
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        downloadJson()
         setupVies()
+        setupBinding()
     }
-}
-
-//MARK: - downloadJson
-
-private extension MoviesViewController {
     
-    func downloadJson() {
-        let urlString = UrlString.urlString
-        guard let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { ( data, _, error ) in
-            guard let data = data else { return }
-            guard error == nil else { return }
+    // MARK: Private methods
+    
+    private func loadData() {
+        networkLayer = NetworkLayer()
+        networkLayer?.downloadJson(complition: { [weak self] item in
+            guard let self = self else { return }
             
-            do {
-                self.results = try JSONDecoder().decode(Results.self, from: data)
-                DispatchQueue.main.async {
-                    self.moviesTableView.reloadData()
-                }
-                print(self.results)
-            } catch {
-                print(Constants.jsonError)
+            self.results = item
+            DispatchQueue.main.async {
+                self.moviesTableView.reloadData()
             }
-        } .resume()
+        })
+    }
+    
+    private func goTMoviesDetailViewController(indexPath: Int) {
+        guard let id = results.results?[indexPath].id else { return }
+        selectIdOne = id
+        coordinator?.goToMovieDetailViewController(id: selectIdOne ?? Constants.zero)
     }
 }
 
@@ -66,6 +62,10 @@ private extension MoviesViewController {
         setupTableView()
         configureNavigationController()
         layout()
+    }
+    
+    func setupBinding() {
+        loadData()
     }
 }
 
@@ -104,17 +104,19 @@ extension MoviesViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = moviesTableView.dequeueReusableCell(withIdentifier: Cells.movieCell,
-                                                             for: indexPath) as? MovieTableViewCell else { return UITableViewCell()}
+        guard let cell = moviesTableView.dequeueReusableCell(
+            withIdentifier: Cells.movieCell,
+            for: indexPath) as? MovieTableViewCell else { return UITableViewCell() }
+        
         guard let movie = results.results?[indexPath.row] else { return UITableViewCell() }
+        
         cell.set(movie: movie)
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let id = results.results?[indexPath.row].id else { return }
-        selectIdOne = id
-        coordinator?.goToMovieDetailViewController(id: selectIdOne ?? Constants.zero)
+        goTMoviesDetailViewController(indexPath: indexPath.row)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -131,6 +133,7 @@ private extension MoviesViewController {
     func layout() {
         
         moviesTableView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             moviesTableView.topAnchor.constraint(
                 equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -149,15 +152,11 @@ private extension MoviesViewController {
     
     enum Constants {
         static let zero: Int = 0
-        static let jsonError: String = "Json Error"
         static let title: String = "Популярное"
-    }
-    
-    enum UrlString {
-        static let urlString: String = "https://api.themoviedb.org/3/movie/popular?api_key=799ad00db48f25949a3aaea920d756d6"
     }
     
     enum Cells {
         static let movieCell: String = "movieCell"
     }
+    
 }

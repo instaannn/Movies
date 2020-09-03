@@ -28,12 +28,6 @@ final class Coordinator: ICoordinator {
         goToMoviesViewController()
     }
     
-    func goToMovieDetailViewController(id: Int) {
-        let viewController = MovieDetailViewController()
-        viewController.selectIdTwo = id
-        navigationController.pushViewController(viewController, animated: true)
-    }
-    
     // MARK: - Private methods
     
     private func goToMoviesViewController() {
@@ -41,4 +35,16 @@ final class Coordinator: ICoordinator {
         viewController.coordinator = self
         navigationController.pushViewController(viewController, animated: true)
     }
+}
+
+// MARK: - Private IMoviesCoordinator
+
+extension Coordinator: IMoviesCoordinator {
+    
+    func goToMovieDetailViewController(id: Int) {
+           let viewController = MovieDetailViewController()
+           viewController.selectIdTwo = id
+           navigationController.pushViewController(viewController, animated: true)
+       }
+    
 }
