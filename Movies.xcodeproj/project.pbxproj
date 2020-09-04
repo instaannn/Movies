@@ -24,6 +24,7 @@
 		859B48802501085F00AF95BA /* Url.swift in Sources */ = {isa = PBXBuildFile; fileRef = 859B487F2501085F00AF95BA /* Url.swift */; };
 		859B4883250115FB00AF95BA /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 859B4882250115FB00AF95BA /* Colors.swift */; };
 		859B48862501294800AF95BA /* IMoviesCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 859B48852501294800AF95BA /* IMoviesCoordinator.swift */; };
+		859B488B2502502E00AF95BA /* UIViewController+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 859B488A2502502E00AF95BA /* UIViewController+extensions.swift */; };
 		85AA8DF024F983EC0064EA4D /* MovieDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AA8DEF24F983EC0064EA4D /* MovieDetailViewController.swift */; };
 		85AA8DF224FB98E20064EA4D /* MovieDetailModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AA8DF124FB98E20064EA4D /* MovieDetailModel.swift */; };
 		85AA8DF424FE52D40064EA4D /* GenresCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AA8DF324FE52D40064EA4D /* GenresCollectionViewCell.swift */; };
@@ -51,6 +52,7 @@
 		859B487F2501085F00AF95BA /* Url.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Url.swift; sourceTree = "<group>"; };
 		859B4882250115FB00AF95BA /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		859B48852501294800AF95BA /* IMoviesCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMoviesCoordinator.swift; sourceTree = "<group>"; };
+		859B488A2502502E00AF95BA /* UIViewController+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+extensions.swift"; sourceTree = "<group>"; };
 		85AA8DEF24F983EC0064EA4D /* MovieDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailViewController.swift; sourceTree = "<group>"; };
 		85AA8DF124FB98E20064EA4D /* MovieDetailModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailModel.swift; sourceTree = "<group>"; };
 		85AA8DF324FE52D40064EA4D /* GenresCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenresCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -168,6 +170,7 @@
 			children = (
 				8507FFDB24F79E0A0051F265 /* UIImageView+extension.swift */,
 				8502206F24FFAEA40071D00E /* UIView+extension.swift */,
+				859B488A2502502E00AF95BA /* UIViewController+extensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -207,11 +210,18 @@
 			path = Color;
 			sourceTree = "<group>";
 		};
+		859B488925024B9900AF95BA /* Cell */ = {
+			isa = PBXGroup;
+			children = (
+				85AA8DF324FE52D40064EA4D /* GenresCollectionViewCell.swift */,
+			);
+			path = Cell;
+			sourceTree = "<group>";
+		};
 		85AA8DEB24F983AA0064EA4D /* MovieDetailModule */ = {
 			isa = PBXGroup;
 			children = (
 				85AA8DEE24F983CA0064EA4D /* ViewController */,
-				85AA8DED24F983C50064EA4D /* View */,
 				85AA8DEC24F983BD0064EA4D /* Model */,
 			);
 			path = MovieDetailModule;
@@ -226,18 +236,11 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
-		85AA8DED24F983C50064EA4D /* View */ = {
-			isa = PBXGroup;
-			children = (
-				85AA8DF324FE52D40064EA4D /* GenresCollectionViewCell.swift */,
-			);
-			path = View;
-			sourceTree = "<group>";
-		};
 		85AA8DEE24F983CA0064EA4D /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
 				85AA8DEF24F983EC0064EA4D /* MovieDetailViewController.swift */,
+				859B488925024B9900AF95BA /* Cell */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -322,6 +325,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				859B488B2502502E00AF95BA /* UIViewController+extensions.swift in Sources */,
 				8502207024FFAEA40071D00E /* UIView+extension.swift in Sources */,
 				859B4883250115FB00AF95BA /* Colors.swift in Sources */,
 				859B48862501294800AF95BA /* IMoviesCoordinator.swift in Sources */,

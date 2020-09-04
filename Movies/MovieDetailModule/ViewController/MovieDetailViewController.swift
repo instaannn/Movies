@@ -31,7 +31,6 @@ final class MovieDetailViewController: UIViewController {
     private lazy var genresCollectionView = UICollectionView()
     private lazy var overviewLabel = UILabel()
     private lazy var trailerButton = UIButton()
-    private lazy var token = Constants.token
     
     // MARK: - Lifecycle
     
@@ -48,10 +47,7 @@ final class MovieDetailViewController: UIViewController {
     private func actionButton() {
         guard let key = trailers.results?.first?.key,
             let url = URL(string: "https://www.youtube.com/watch?v=\(key)") else {
-                let alert = UIAlertController(title: "Oops!", message: "Trailer unavailable", preferredStyle: .alert)
-                let action = UIAlertAction(title: "Ok", style: .cancel, handler: .none)
-                alert.addAction(action)
-                present(alert, animated: true, completion: .none)
+                showAlert(title: "Oops!", message: "Trailer unavailable")
                 return
         }
         let vc = SFSafariViewController(url: url)
@@ -64,7 +60,7 @@ final class MovieDetailViewController: UIViewController {
 private extension MovieDetailViewController {
     
     func requestDetails(for id: Int) {
-        guard let url = URL(string: "https://api.themoviedb.org/3/movie/\(id)?api_key=\(token)") else { return }
+        guard let url = URL(string: "\(Url.urlDetail)\(id)?api_key=\(Url.token)") else { return }
         
         let dataTask = URLSession.shared.dataTask(with: url) { [ weak self] (data, response, error)  in
             if let data = data,
@@ -102,7 +98,7 @@ private extension MovieDetailViewController {
     //MARK: - requestTrailer
     
     func requestTrailer(for id: Int) {
-        guard let url = URL(string: "https://api.themoviedb.org/3/movie/\(id)/videos?api_key=\(token)") else { return }
+        guard let url = URL(string: "\(Url.urlDetail)\(id)/videos?api_key=\(Url.token)") else { return }
         
         let dataTask = URLSession.shared.dataTask(with: url) { [weak self] (data, response, error)  in
             if let data = data,
@@ -166,7 +162,7 @@ private extension MovieDetailViewController {
     }
     
     func loadImage() {
-        let moviePosterString = "https://image.tmdb.org/t/p/w500" + "\(movieDetail.poster_path ?? "")"
+        let moviePosterString = Url.urlPoster + "\(movieDetail.poster_path ?? "")"
         guard let url = URL(string: moviePosterString) else { return }
         posterBackground.load(url: url)
         posterImageView.load(url: url)
@@ -178,7 +174,8 @@ private extension MovieDetailViewController {
         
         let path = UIBezierPath(roundedRect: posterBackground.bounds,
                                 byRoundingCorners:[.bottomRight, .bottomLeft],
-                                cornerRadii: CGSize(width: 30, height: 30))
+                                cornerRadii: CGSize(width: Constants.cornerRadiusBackground,
+                                                    height: Constants.cornerRadiusBackground))
         let maskLayer = CAShapeLayer()
         maskLayer.path = path.cgPath
         posterBackground.layer.mask = maskLayer
@@ -187,7 +184,7 @@ private extension MovieDetailViewController {
     func configurePosterImageView() {
         loadImage()
         posterImageView.contentMode = .scaleAspectFill
-        posterImageView.layer.cornerRadius = 8
+        posterImageView.layer.cornerRadius = Constants.cornerRadius
         posterImageView.clipsToBounds = true
         posterImageView.layer.masksToBounds = true
     }
@@ -195,43 +192,43 @@ private extension MovieDetailViewController {
     func configureTitleLabel() {
         titleLabel.text = movieDetail.title
         titleLabel.textColor = .black
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 30)
+        titleLabel.font = UIFont.boldSystemFont(ofSize: Constants.titleLabelFont)
         titleLabel.adjustsFontSizeToFitWidth = true
-        titleLabel.numberOfLines = 0
+        titleLabel.numberOfLines = Constants.zero
     }
     
     func configureStarImageView() {
-        starImageView.image = UIImage(named: "star")
+        starImageView.image = UIImage(named: Constants.starImageViewName)
     }
     
     func configureVoteLabel() {
         if let voteAverage = movieDetail.vote_average {
-            let average: String = String(format: "%.1f", voteAverage)
+            let average = String(format: Constants.doubleFormat, voteAverage)
             voteAverageLabel.text = average
-            if voteAverage <= 7.0 {
+            if voteAverage <= Constants.doubleVoteAverage {
                 voteAverageLabel.textColor = .red
             } else {
                 voteAverageLabel.textColor = .black
             }
         }
-        voteAverageLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        voteAverageLabel.font = UIFont.boldSystemFont(ofSize: Constants.boldFont)
     }
     
     func configureClockImageView() {
-        clockImageView.image = UIImage(named: "clock")
+        clockImageView.image = UIImage(named: Constants.clockImageViewName)
     }
     
     func configureRunTimeLabel() {
         guard let time = movieDetail.runtime else { return }
-        let hour = time / 60
-        let minute = time - (hour * 60)
+        let hour = time / Constants.hour
+        let minute = time - (hour * Constants.hour)
         runTimeLabel.text = "\(hour)h \(minute)min"
-        runTimeLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        runTimeLabel.font = UIFont.boldSystemFont(ofSize: Constants.boldFont)
     }
     
     func configureGenresCollectionView() {
         let flowLayout = ExecutorViewFlowLayout()
-        flowLayout.estimatedItemSize = CGSize(width: 1, height: 1)
+        flowLayout.estimatedItemSize = CGSize(width: Constants.one, height: Constants.one)
         genresCollectionView = UICollectionView(frame: CGRect.zero,
                                                 collectionViewLayout: flowLayout)
         genresCollectionView.register(GenresCollectionViewCell.self,
@@ -244,18 +241,18 @@ private extension MovieDetailViewController {
     
     func configureOverviewLabel() {
         overviewLabel.text = movieDetail.overview
-        overviewLabel.numberOfLines = 0
+        overviewLabel.numberOfLines = Constants.zero
         overviewLabel.adjustsFontSizeToFitWidth = true
-        overviewLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        overviewLabel.font = UIFont.boldSystemFont(ofSize: Constants.boldFont)
         overviewLabel.textColor = UIColor.gray
     }
     
     func configureTrailerButton() {
-        trailerButton.setTitle("Show trailer", for: .normal)
-        trailerButton.layer.cornerRadius = 8
+        trailerButton.setTitle(Constants.railerButtonSetTitle, for: .normal)
+        trailerButton.layer.cornerRadius = Constants.cornerRadius
         trailerButton.clipsToBounds = true
-        trailerButton.setGradient(colorOne: UIColor(red: 170/255.0, green: 147/255.0, blue: 214/255.0, alpha: 1),
-                                  colorTwo: UIColor(red: 207/255.0, green: 206/255.0, blue: 245/255.0, alpha: 1))
+        trailerButton.setGradient(colorOne: Colors.darkPurple,
+                                  colorTwo: Colors.lightPurple)
         trailerButton.setTitleColor(.black, for: .normal)
     }
 }
@@ -269,7 +266,7 @@ extension MovieDetailViewController: UICollectionViewDelegate {}
 extension MovieDetailViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return movieDetail.genres?.count ?? 0
+        return movieDetail.genres?.count ?? Constants.zero
     }
     
     func collectionView(_ collectionView: UICollectionView,
@@ -277,9 +274,9 @@ extension MovieDetailViewController: UICollectionViewDataSource {
         guard let cell = genresCollectionView.dequeueReusableCell(withReuseIdentifier: Cells.collectionViewCell,
                                                                   for: indexPath) as? GenresCollectionViewCell else { return UICollectionViewCell() }
         cell.genresLabel.text = movieDetail.genres?[indexPath.row].name
-        cell.layer.cornerRadius = 8
+        cell.layer.cornerRadius = Constants.cornerRadius
         cell.clipsToBounds = true
-        cell.contentView.backgroundColor = UIColor(red: 207/255.0, green: 206/255.0, blue: 245/255.0, alpha: 1)
+        cell.contentView.backgroundColor = Colors.lightPurple
         return cell
     }
 }
@@ -301,7 +298,7 @@ private extension MovieDetailViewController {
             posterBackground.trailingAnchor.constraint(
                 equalTo: view.trailingAnchor),
             posterBackground.heightAnchor.constraint(
-                equalToConstant: 150),
+                equalToConstant: Constants.posterBackgroundHeightAnchor),
             posterBackground.topAnchor.constraint(
                 equalTo: view.safeAreaLayoutGuide.topAnchor)])
         
@@ -309,89 +306,89 @@ private extension MovieDetailViewController {
         NSLayoutConstraint.activate([
             posterImageView.leadingAnchor.constraint(
                 equalTo: view.leadingAnchor,
-                constant: 25),
+                constant: Constants.posterImageViewLeadingAnchor),
             posterImageView.topAnchor.constraint(
                 equalTo: view.safeAreaLayoutGuide.topAnchor,
-                constant: 60),
+                constant: Constants.posterImageViewTopAnchor),
             posterImageView.widthAnchor.constraint(
-                equalToConstant: 150),
+                equalToConstant: Constants.posterImageViewWidthAnchor),
             posterImageView.heightAnchor.constraint(
-                equalToConstant: 230)])
+                equalToConstant: Constants.posterImageViewHeightAnchor)])
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(
                 equalTo: posterImageView.trailingAnchor,
-                constant: 15),
+                constant: Constants.fifteenAnchor),
             titleLabel.trailingAnchor.constraint(
                 equalTo: view.trailingAnchor,
-                constant: -15),
+                constant: Constants.titleLabelTrailingAnchor),
             titleLabel.topAnchor.constraint(
                 equalTo: posterBackground.bottomAnchor,
-                constant: 15),
+                constant: Constants.fifteenAnchor),
             titleLabel.heightAnchor.constraint(
-                equalToConstant: 55)])
+                equalToConstant: Constants.titleLabelHeightAnchor)])
         
         starImageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             starImageView.topAnchor.constraint(
                 equalTo: titleLabel.bottomAnchor,
-                constant: 10),
+                constant: Constants.tenAnchor),
             starImageView.leadingAnchor.constraint(
                 equalTo: titleLabel.leadingAnchor),
             starImageView.widthAnchor.constraint(
-                equalToConstant: 20),
+                equalToConstant: Constants.twentyAnchor),
             starImageView.heightAnchor.constraint(
-                equalToConstant: 20)])
+                equalToConstant: Constants.twentyAnchor)])
         
         voteAverageLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             voteAverageLabel.leadingAnchor.constraint(
                 equalTo: starImageView.trailingAnchor,
-                constant: 5),
+                constant: Constants.fiveAnchor),
             voteAverageLabel.centerYAnchor.constraint(
                 equalTo: starImageView.centerYAnchor),
             voteAverageLabel.widthAnchor.constraint(
-                equalToConstant: 30),
+                equalToConstant: Constants.voteAverageLabelWidthAnchor),
             voteAverageLabel.heightAnchor.constraint(
-                equalToConstant: 20)])
+                equalToConstant: Constants.twentyAnchor)])
         
         clockImageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             clockImageView.leadingAnchor.constraint(
                 equalTo: voteAverageLabel.trailingAnchor,
-                constant: 15),
+                constant: Constants.fifteenAnchor),
             clockImageView.centerYAnchor.constraint(
                 equalTo: starImageView.centerYAnchor),
             clockImageView.widthAnchor.constraint(
-                equalToConstant: 20),
+                equalToConstant: Constants.twentyAnchor),
             clockImageView.heightAnchor.constraint(
-                equalToConstant: 20)])
+                equalToConstant: Constants.twentyAnchor)])
         
         runTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             runTimeLabel.leadingAnchor.constraint(
                 equalTo: clockImageView.trailingAnchor,
-                constant: 5),
+                constant: Constants.fiveAnchor),
             runTimeLabel.centerYAnchor.constraint(
                 equalTo: starImageView.centerYAnchor),
             runTimeLabel.widthAnchor.constraint(
-                equalToConstant: 90),
+                equalToConstant: Constants.runTimeLabelWidthAnchor),
             runTimeLabel.heightAnchor.constraint(
-                equalToConstant: 20)])
+                equalToConstant: Constants.twentyAnchor)])
         
         genresCollectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             genresCollectionView.leadingAnchor.constraint(
                 equalTo: titleLabel.leadingAnchor,
-                constant: -10),
+                constant: Constants.genresCollectionViewLeadingAnchor),
             genresCollectionView.trailingAnchor.constraint(
                 equalTo: titleLabel.trailingAnchor),
             genresCollectionView.heightAnchor.constraint(
-                equalToConstant: 30),
+                equalToConstant: Constants.genresCollectionViewHeightAnchor),
             genresCollectionView.topAnchor.constraint(
                 equalTo: starImageView.bottomAnchor,
-                constant: 10)])
+                constant: Constants.tenAnchor)])
         
         overviewLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -401,23 +398,23 @@ private extension MovieDetailViewController {
                 equalTo: titleLabel.trailingAnchor),
             overviewLabel.topAnchor.constraint(
                 equalTo: posterImageView.bottomAnchor,
-                constant: 20),
+                constant: Constants.twentyAnchor),
             overviewLabel.heightAnchor.constraint(
-                equalToConstant: 150)])
+                equalToConstant: Constants.overviewLabelHeightAnchor)])
         
         trailerButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             trailerButton.topAnchor.constraint(
                 equalTo: overviewLabel.bottomAnchor,
-                constant: 20),
+                constant: Constants.twentyAnchor),
             trailerButton.leadingAnchor.constraint(
                 equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                constant: 100),
+                constant: Constants.trailerButtonLeadingAnchor),
             trailerButton.trailingAnchor.constraint(
                 equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                constant: -100),
+                constant: Constants.trailerButtonTrailingAnchor),
             trailerButton.heightAnchor.constraint(
-                equalToConstant: 50)])
+                equalToConstant: Constants.trailerButtonHeightAnchor)])
     }
 }
 
@@ -426,10 +423,42 @@ private extension MovieDetailViewController {
 private extension MovieDetailViewController {
     
     enum Constants {
-        static let token: String = "799ad00db48f25949a3aaea920d756d6"
+        static let cornerRadiusBackground: CGFloat = 30
+        static let doubleVoteAverage: Double = 7.0
+        static let doubleFormat: String = "%.1f"
+        static let titleLabelFont: CGFloat = 30
+        static let clockImageViewName: String = "clock"
+        static let starImageViewName: String = "star"
+        static let hour: Int = 60
+        static let one: Int = 1
+        static let boldFont: CGFloat = 18
+        static let zero: Int = 0
+        static let railerButtonSetTitle: String = "Show trailer"
+        static let cornerRadius: CGFloat = 8
+        static let twentyAnchor: CGFloat = 20
+        static let posterBackgroundHeightAnchor: CGFloat = 150
+        static let posterImageViewLeadingAnchor: CGFloat = 25
+        static let posterImageViewTopAnchor: CGFloat = 60
+        static let posterImageViewWidthAnchor: CGFloat = 150
+        static let posterImageViewHeightAnchor: CGFloat = 230
+        static let fifteenAnchor: CGFloat = 15
+        static let tenAnchor: CGFloat = 10
+        static let fiveAnchor: CGFloat = 5
+        static let titleLabelTrailingAnchor: CGFloat = -15
+        static let titleLabelHeightAnchor: CGFloat = 55
+        static let voteAverageLabelWidthAnchor: CGFloat = 30
+        static let runTimeLabelWidthAnchor: CGFloat = 90
+        static let genresCollectionViewLeadingAnchor: CGFloat = -10
+        static let genresCollectionViewHeightAnchor: CGFloat = 30
+        static let overviewLabelHeightAnchor: CGFloat = 150
+        static let trailerButtonLeadingAnchor: CGFloat = 100
+        static let trailerButtonTrailingAnchor: CGFloat = -100
+        static let trailerButtonHeightAnchor: CGFloat = 50
     }
     
     enum Cells {
         static let collectionViewCell: String = "genresCell"
     }
+    
 }
+
