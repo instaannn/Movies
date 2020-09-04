@@ -10,4 +10,6 @@
 
 protocol INetworkLayer {
     func downloadJson(complition: @escaping (Results) -> Void)
+    func requestTrailer(for id: Int, complition: @escaping (Trailers) -> Void)
+    func requestDetails(for id: Int, complition: @escaping (MovieDetail) -> Void) 
 }

@@ -21,6 +21,7 @@ final class MovieDetailViewController: UIViewController {
     
     private lazy var movieDetail = MovieDetail()
     private lazy var trailers = Trailers()
+    private var networkLayer: INetworkLayer?
     private lazy var posterBackground = UIImageView()
     private lazy var posterImageView = UIImageView()
     private lazy var titleLabel = UILabel()
@@ -36,48 +37,29 @@ final class MovieDetailViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.largeTitleDisplayMode = .never
-        requestDetails(for: selectIdTwo)
-        requestTrailer(for: selectIdTwo)
+        
         configureGenresCollectionView()
         setupVies()
+        setupBinding()
     }
     
-    @objc
-    private func actionButton() {
-        guard let key = trailers.results?.first?.key,
-            let url = URL(string: "https://www.youtube.com/watch?v=\(key)") else {
-                showAlert(title: "Oops!", message: "Trailer unavailable")
-                return
-        }
-        let vc = SFSafariViewController(url: url)
-        present(vc, animated: true, completion: .none)
-    }
-}
-
-//MARK: - requestDetails
-
-private extension MovieDetailViewController {
+    // MARK: - Private methods
     
-    func requestDetails(for id: Int) {
-        guard let url = URL(string: "\(Url.urlDetail)\(id)?api_key=\(Url.token)") else { return }
-        
-        let dataTask = URLSession.shared.dataTask(with: url) { [ weak self] (data, response, error)  in
-            if let data = data,
-                (response as? HTTPURLResponse)?.statusCode == 200,
-                error == nil {
-                print(data)
-                self?.parseDetails(from: data)
-            } else {
-                print("Network error")
+    private func loadTrailers() {
+        networkLayer = NetworkLayer()
+        networkLayer?.requestTrailer(for: selectIdTwo, complition: {  [weak self] item in
+            guard let self = self else { return }
+            self.trailers = item
+            DispatchQueue.main.async {
             }
-        }
-        dataTask.resume()
+        })
     }
     
-    func parseDetails(from data: Data) {
-        do {
-            self.movieDetail = try JSONDecoder().decode(MovieDetail.self, from: data)
+    private func loadDetails() {
+        networkLayer = NetworkLayer()
+        networkLayer?.requestDetails(for: selectIdTwo, complition: { [weak self] item in
+            guard let self = self else { return }
+            self.movieDetail = item
             DispatchQueue.main.async {
                 self.configurePosterImageView()
                 self.configurePosterBackground()
@@ -90,37 +72,18 @@ private extension MovieDetailViewController {
                 self.configureTrailerButton()
                 self.genresCollectionView.reloadData()
             }
-        } catch {
-            print("Json Error")
-        }
+        })
     }
     
-    //MARK: - requestTrailer
-    
-    func requestTrailer(for id: Int) {
-        guard let url = URL(string: "\(Url.urlDetail)\(id)/videos?api_key=\(Url.token)") else { return }
-        
-        let dataTask = URLSession.shared.dataTask(with: url) { [weak self] (data, response, error)  in
-            if let data = data,
-                (response as? HTTPURLResponse)?.statusCode == 200,
-                error == nil {
-                print(data)
-                self?.parseTrailer(from: data)
-            } else {
-                print("Network error")
-            }
+    @objc
+    private func actionButton() {
+        guard let key = trailers.results?.first?.key,
+            let url = URL(string: "\(Url.urlYoutube)\(key)") else {
+                showAlert(title: Constants.alertTitle, message: Constants.alertMessage)
+                return
         }
-        dataTask.resume()
-    }
-    
-    func parseTrailer(from data: Data) {
-        do {
-            trailers = try JSONDecoder().decode(Trailers.self, from: data)
-            DispatchQueue.main.async {
-            }
-        } catch {
-            print("Json Error")
-        }
+        let vc = SFSafariViewController(url: url)
+        present(vc, animated: true, completion: .none)
     }
 }
 
@@ -133,6 +96,11 @@ private extension MovieDetailViewController {
         setView()
         addActions()
         layout()
+    }
+    
+    func setupBinding() {
+        loadTrailers()
+        loadDetails()
     }
 }
 
@@ -159,6 +127,7 @@ private extension MovieDetailViewController {
     
     func setView() {
         view.backgroundColor = .white
+        navigationItem.largeTitleDisplayMode = .never
     }
     
     func loadImage() {
@@ -271,8 +240,9 @@ extension MovieDetailViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = genresCollectionView.dequeueReusableCell(withReuseIdentifier: Cells.collectionViewCell,
-                                                                  for: indexPath) as? GenresCollectionViewCell else { return UICollectionViewCell() }
+        guard let cell = genresCollectionView.dequeueReusableCell(
+            withReuseIdentifier: Cells.collectionViewCell,
+            for: indexPath) as? GenresCollectionViewCell else { return UICollectionViewCell() }
         cell.genresLabel.text = movieDetail.genres?[indexPath.row].name
         cell.layer.cornerRadius = Constants.cornerRadius
         cell.clipsToBounds = true
@@ -423,6 +393,8 @@ private extension MovieDetailViewController {
 private extension MovieDetailViewController {
     
     enum Constants {
+        static let alertTitle: String = "Oops!"
+        static let alertMessage: String = "Trailer unavailable"
         static let cornerRadiusBackground: CGFloat = 30
         static let doubleVoteAverage: Double = 7.0
         static let doubleFormat: String = "%.1f"
