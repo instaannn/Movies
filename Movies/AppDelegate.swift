@@ -11,13 +11,16 @@ import UIKit
 //MARK: - AppDelegate
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
     
     // MARK: - Public properties
     
     var window: UIWindow?
-    let navigationController = UINavigationController()
     
+    // MARK: - Private properties
+    
+    private let navigationController = UINavigationController()
+   
     // MARK: - Public methods
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -34,4 +37,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
 }
-

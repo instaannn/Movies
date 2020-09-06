@@ -18,7 +18,7 @@ final class Row {
     
     // MARK: - Private properties
     
-    private lazy var spacing: CGFloat = 0
+    private lazy var spacing = Constants.spacing
     
     // MARK: - Init
     
@@ -33,11 +33,22 @@ final class Row {
     }
     
     func tagLayout(collectionViewWidth: CGFloat) {
-        let padding = 10
+        let padding = Constants.padding
         var offset = padding
         for attribute in attributes {
             attribute.frame.origin.x = CGFloat(offset)
             offset += Int(attribute.frame.width + spacing)
         }
     }
+}
+
+//MARK: - Constants
+
+private extension Row {
+    
+    enum Constants {
+        static let spacing: CGFloat = 0
+        static let padding: Int = 10
+    }
+    
 }

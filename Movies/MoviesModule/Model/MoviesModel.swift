@@ -6,9 +6,13 @@
 //  Copyright © 2020 Анна Сычева. All rights reserved.
 //
 
+//MARK: - Results
+
 struct Results: Decodable {
     var results: [Movies]?
 }
+
+//MARK: - Movies
 
 struct Movies: Decodable {
     var original_language: String?
@@ -18,4 +22,5 @@ struct Movies: Decodable {
     var vote_count: Int?
     var poster_path: String?
     var id: Int?
+
 }
