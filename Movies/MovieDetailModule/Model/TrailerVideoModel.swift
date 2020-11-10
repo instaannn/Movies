@@ -7,9 +7,9 @@
 //
 
 struct Trailers: Decodable {
-    var results: [Video]?
+    let results: [Video]
 }
 
 struct Video: Decodable {
-    var key: String?
+    let key: String
 }

@@ -13,5 +13,4 @@ enum Colors {
     static let grafit = UIColor(red: 34/255.0, green: 34/255.0, blue: 34/255.0, alpha: 1)
     static let lightPurple = UIColor(red: 207/255.0, green: 206/255.0, blue: 245/255.0, alpha: 1)
     static let darkPurple = UIColor(red: 170/255.0, green: 147/255.0, blue: 214/255.0, alpha: 1)
-
 }

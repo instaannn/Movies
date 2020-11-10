@@ -23,7 +23,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
    
     // MARK: - Public methods
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         let coordinator = Coordinator(navigationController: navigationController)
         coordinator.start()
