@@ -15,10 +15,10 @@ final class MoviesViewController: UIViewController {
     // MARK: - Public properties
     
     public var coordinator: IMoviesCoordinator?
-  
+    
     // MARK: - Private properties
     
-    private lazy var results = Results()
+    private var results: Results?
     private lazy var moviesTableView = UITableView()
     private var networkLayer: INetworkLayer?
     private var selectIdOne: Int?
@@ -36,18 +36,24 @@ final class MoviesViewController: UIViewController {
     
     private func loadData() {
         networkLayer = NetworkLayer()
-        networkLayer?.downloadJson(complition: { [weak self] item in
+        networkLayer?.fetchResult(complition: { [weak self] item in
             guard let self = self else { return }
-            
-            self.results = item
+            print(Thread.current)
             DispatchQueue.main.async {
-                self.moviesTableView.reloadData()
+                switch item {
+                case .failure(let error):
+                    print(error)
+                case .success(let data):
+                    self.results = data
+                    self.moviesTableView.reloadData()
+                }
+                print(Thread.current)
             }
         })
     }
     
     private func goTMoviesDetailViewController(indexPath: Int) {
-        guard let id = results.results?[indexPath].id else { return }
+        guard let id = results?.results[indexPath].id else { return }
         selectIdOne = id
         coordinator?.goToMovieDetailViewController(id: selectIdOne ?? Constants.zero)
     }
@@ -100,15 +106,15 @@ extension MoviesViewController: UITableViewDelegate {}
 extension MoviesViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return results.results?.count ?? Constants.zero
+        return results?.results.count ?? Constants.zero
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = moviesTableView.dequeueReusableCell(
-            withIdentifier: Cells.movieCell,
-            for: indexPath) as? MovieTableViewCell else { return UITableViewCell() }
+                withIdentifier: Cells.movieCell,
+                for: indexPath) as? MovieTableViewCell else { return UITableViewCell() }
         
-        guard let movie = results.results?[indexPath.row] else { return UITableViewCell() }
+        guard let movie = results?.results[indexPath.row] else { return UITableViewCell() }
         
         cell.set(movie: movie)
         
@@ -135,14 +141,14 @@ private extension MoviesViewController {
         moviesTableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            moviesTableView.topAnchor.constraint(
-                equalTo: view.safeAreaLayoutGuide.topAnchor),
-            moviesTableView.bottomAnchor.constraint(
-                equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            moviesTableView.leadingAnchor.constraint(
-                equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            moviesTableView.trailingAnchor.constraint(
-                equalTo: view.safeAreaLayoutGuide.trailingAnchor)])
+                                        moviesTableView.topAnchor.constraint(
+                                            equalTo: view.safeAreaLayoutGuide.topAnchor),
+                                        moviesTableView.bottomAnchor.constraint(
+                                            equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+                                        moviesTableView.leadingAnchor.constraint(
+                                            equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+                                        moviesTableView.trailingAnchor.constraint(
+                                            equalTo: view.safeAreaLayoutGuide.trailingAnchor)])
     }
 }
 

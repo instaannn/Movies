@@ -9,18 +9,28 @@
 //MARK: - Results
 
 struct Results: Decodable {
-    var results: [Movies]?
+    let results: [Movies]
 }
 
 //MARK: - Movies
 
 struct Movies: Decodable {
-    var original_language: String?
-    var title: String?
-    var vote_average: Double?
-    var release_date: String?
-    var vote_count: Int?
-    var poster_path: String?
-    var id: Int?
-
+    let originalLanguage: String
+    let title: String
+    let voteAverage: Double
+    let releaseDate: String
+    let voteCount: Int
+    let posterPath: String
+    let id: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case originalLanguage = "original_language"
+        case title
+        case voteAverage = "vote_average"
+        case releaseDate = "release_date"
+        case voteCount = "vote_count"
+        case posterPath = "poster_path"
+        case id
+    }
+    
 }

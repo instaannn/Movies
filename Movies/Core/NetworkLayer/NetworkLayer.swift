@@ -12,65 +12,40 @@ import Foundation
 
 final class NetworkLayer: INetworkLayer {
     
-    func downloadJson(complition: @escaping (Results) -> Void) {
-        let urlString = Url.url
-        guard let url = URL(string: urlString) else { return }
+    // MARK: - Public methods
+    
+    func fetchResult(complition: @escaping(Result<Results, Error>) -> Void) {
+        downloadJson(url: Url.url, complition: complition)
+    }
+    
+    func fetchTrailer(for id: Int, complition: @escaping(Result<Trailers, Error>) -> Void) {
+        downloadJson(url: "\(Url.urlDetail)\(id)/videos?api_key=\(Url.token)", complition: complition)
+    }
+    
+    func fetchDetails(for id: Int, complition: @escaping(Result<MovieDetail, Error>) -> Void) {
+        downloadJson(url: "\(Url.urlDetail)\(id)?api_key=\(Url.token)", complition: complition)
+    }
+    
+    // MARK: - Private methods
+    
+    private func downloadJson<T: Decodable>(url: String, complition: @escaping(Result<T, Error>) -> Void) {
+        guard let url = URL(string: url) else { return }
         
-        URLSession.shared.dataTask(with: url) { ( data, _, error ) in
+        let session = URLSession.shared
+        session.dataTask(with: url) { (data, _, error) in
+            if let error = error {
+                complition(.failure(error))
+                return
+            }
             guard let data = data else { return }
-            guard error == nil else { return }
             
             do {
-                let results = try JSONDecoder().decode(Results.self, from: data)
-                complition(results)
+                let object = try JSONDecoder().decode(T.self, from: data)
+                complition(.success(object))
             } catch {
-                print("Json Error")
+                complition(.failure(error))
             }
-        } .resume()
-    }
-    
-    func requestTrailer(for id: Int, complition: @escaping (Trailers) -> Void) {
-        guard let url = URL(string: "\(Url.urlDetail)\(id)/videos?api_key=\(Url.token)") else { return }
-        
-        let dataTask = URLSession.shared.dataTask(with: url) { (data, response, error)  in
-            if let data = data,
-                (response as? HTTPURLResponse)?.statusCode == 200,
-                error == nil {
-                
-                do {
-                    let trailers = try JSONDecoder().decode(Trailers.self, from: data)
-                    complition(trailers)
-                } catch {
-                    print("Json Error")
-                }
-            } else {
-                print("Network error")
-            }
-        }
-        dataTask.resume()
-    }
-    
-    func requestDetails(for id: Int, complition: @escaping (MovieDetail) -> Void) {
-        guard let url = URL(string: "\(Url.urlDetail)\(id)?api_key=\(Url.token)") else { return }
-        
-        let dataTask = URLSession.shared.dataTask(with: url) { (data, response, error)  in
-            if let data = data,
-                (response as? HTTPURLResponse)?.statusCode == 200,
-                error == nil {
-                
-                do {
-                    let movieDetail = try JSONDecoder().decode(MovieDetail.self, from: data)
-                    complition(movieDetail)
-                } catch {
-                    print("Json Error")
-                }
-                
-            } else {
-                print("Network error")
-            }
-        }
-        dataTask.resume()
+        }.resume()
     }
     
 }
-

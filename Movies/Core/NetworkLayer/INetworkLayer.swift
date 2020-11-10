@@ -9,7 +9,7 @@
 //MARK: - INetworkLayer
 
 protocol INetworkLayer {
-    func downloadJson(complition: @escaping (Results) -> Void)
-    func requestTrailer(for id: Int, complition: @escaping (Trailers) -> Void)
-    func requestDetails(for id: Int, complition: @escaping (MovieDetail) -> Void) 
+    func fetchResult(complition: @escaping (Result<Results, Error>) -> Void)
+    func fetchTrailer(for id: Int, complition: @escaping(Result<Trailers, Error>) -> Void)
+    func fetchDetails(for id: Int, complition: @escaping(Result<MovieDetail, Error>) -> Void)
 }

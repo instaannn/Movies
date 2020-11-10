@@ -19,8 +19,8 @@ final class MovieDetailViewController: UIViewController {
     
     // MARK: - Private properties
     
-    private lazy var movieDetail = MovieDetail()
-    private lazy var trailers = Trailers()
+    private var movieDetail: MovieDetail?
+    private var trailers: Trailers?
     private var networkLayer: INetworkLayer?
     private lazy var posterBackground = UIImageView()
     private lazy var posterImageView = UIImageView()
@@ -47,37 +47,51 @@ final class MovieDetailViewController: UIViewController {
     
     private func loadTrailers() {
         networkLayer = NetworkLayer()
-        networkLayer?.requestTrailer(for: selectIdTwo, complition: {  [weak self] item in
+        networkLayer?.fetchTrailer(for: selectIdTwo, complition: { [weak self] item in
             guard let self = self else { return }
-            self.trailers = item
+            print(Thread.current)
             DispatchQueue.main.async {
+                switch item {
+                case .failure(let error):
+                    print(error)
+                case .success(let data):
+                    self.trailers = data
+                }
+                print(Thread.current)
             }
         })
     }
     
     private func loadDetails() {
         networkLayer = NetworkLayer()
-        networkLayer?.requestDetails(for: selectIdTwo, complition: { [weak self] item in
+        networkLayer?.fetchDetails(for: selectIdTwo, complition: { [weak self] item in
             guard let self = self else { return }
-            self.movieDetail = item
+            print(Thread.current)
             DispatchQueue.main.async {
-                self.configurePosterImageView()
-                self.configurePosterBackground()
-                self.configureTitleLabel()
-                self.configureStarImageView()
-                self.configureVoteLabel()
-                self.configureClockImageView()
-                self.configureRunTimeLabel()
-                self.configureOverviewLabel()
-                self.configureTrailerButton()
-                self.genresCollectionView.reloadData()
+                switch item {
+                case .failure(let error):
+                    print(error)
+                case .success(let data):
+                    self.movieDetail = data
+                    self.configurePosterImageView()
+                    self.configurePosterBackground()
+                    self.configureTitleLabel()
+                    self.configureStarImageView()
+                    self.configureVoteLabel()
+                    self.configureClockImageView()
+                    self.configureRunTimeLabel()
+                    self.configureOverviewLabel()
+                    self.configureTrailerButton()
+                    self.genresCollectionView.reloadData()
+                }
+                print(Thread.current)
             }
         })
     }
     
     @objc
     private func actionButton() {
-        guard let key = trailers.results?.first?.key,
+        guard let key = trailers?.results.first?.key,
             let url = URL(string: "\(Url.urlYoutube)\(key)") else {
                 showAlert(title: Constants.alertTitle, message: Constants.alertMessage)
                 return
@@ -131,7 +145,7 @@ private extension MovieDetailViewController {
     }
     
     func loadImage() {
-        let moviePosterString = Url.urlPoster + "\(movieDetail.poster_path ?? "")"
+        let moviePosterString = Url.urlPoster + "\(movieDetail?.posterPath ?? "")"
         guard let url = URL(string: moviePosterString) else { return }
         posterBackground.load(url: url)
         posterImageView.load(url: url)
@@ -159,7 +173,7 @@ private extension MovieDetailViewController {
     }
     
     func configureTitleLabel() {
-        titleLabel.text = movieDetail.title
+        titleLabel.text = movieDetail?.title
         titleLabel.textColor = .black
         titleLabel.font = UIFont.boldSystemFont(ofSize: Constants.titleLabelFont)
         titleLabel.adjustsFontSizeToFitWidth = true
@@ -171,7 +185,7 @@ private extension MovieDetailViewController {
     }
     
     func configureVoteLabel() {
-        if let voteAverage = movieDetail.vote_average {
+        if let voteAverage = movieDetail?.voteAverage {
             let average = String(format: Constants.doubleFormat, voteAverage)
             voteAverageLabel.text = average
             if voteAverage <= Constants.doubleVoteAverage {
@@ -188,7 +202,7 @@ private extension MovieDetailViewController {
     }
     
     func configureRunTimeLabel() {
-        guard let time = movieDetail.runtime else { return }
+        guard let time = movieDetail?.runtime else { return }
         let hour = time / Constants.hour
         let minute = time - (hour * Constants.hour)
         runTimeLabel.text = "\(hour)h \(minute)min"
@@ -209,7 +223,7 @@ private extension MovieDetailViewController {
     }
     
     func configureOverviewLabel() {
-        overviewLabel.text = movieDetail.overview
+        overviewLabel.text = movieDetail?.overview
         overviewLabel.numberOfLines = Constants.zero
         overviewLabel.adjustsFontSizeToFitWidth = true
         overviewLabel.font = UIFont.boldSystemFont(ofSize: Constants.boldFont)
@@ -235,7 +249,7 @@ extension MovieDetailViewController: UICollectionViewDelegate {}
 extension MovieDetailViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return movieDetail.genres?.count ?? Constants.zero
+        return movieDetail?.genres.count ?? Constants.zero
     }
     
     func collectionView(_ collectionView: UICollectionView,
@@ -243,7 +257,7 @@ extension MovieDetailViewController: UICollectionViewDataSource {
         guard let cell = genresCollectionView.dequeueReusableCell(
             withReuseIdentifier: Cells.collectionViewCell,
             for: indexPath) as? GenresCollectionViewCell else { return UICollectionViewCell() }
-        cell.genresLabel.text = movieDetail.genres?[indexPath.row].name
+        cell.genresLabel.text = movieDetail?.genres[indexPath.row].name
         cell.layer.cornerRadius = Constants.cornerRadius
         cell.clipsToBounds = true
         cell.contentView.backgroundColor = Colors.lightPurple

@@ -66,7 +66,7 @@ final class MovieTableViewCell: UITableViewCell {
             static var es = Constants.flagEs
         }
         
-        switch movie.original_language {
+        switch movie.originalLanguage {
         case FlagName.en:
             flagImageView.image = UIImage(named: Constants.flagImageNameEn)
         case FlagName.ko:
@@ -79,14 +79,12 @@ final class MovieTableViewCell: UITableViewCell {
     }
     
     private func setVoteAverage(movie: Movies) {
-        if let voteAverage = movie.vote_average {
-            let average = String(format: Constants.doubleFormate, voteAverage)
-            voteAverageLabel.text = average
-            if voteAverage <= Constants.voteAverageTextColor {
-                voteAverageLabel.textColor = .red
-            } else {
-                voteAverageLabel.textColor = .black
-            }
+        let average = String(format: Constants.doubleFormate, movie.voteAverage)
+        voteAverageLabel.text = average
+        if movie.voteAverage <= Constants.voteAverageTextColor {
+            voteAverageLabel.textColor = .red
+        } else {
+            voteAverageLabel.textColor = .black
         }
     }
     
@@ -96,13 +94,13 @@ final class MovieTableViewCell: UITableViewCell {
         let dateFormatterPrint = DateFormatter()
         dateFormatterPrint.dateFormat = Constants.dateFormatterPrint
         
-        if let date = dateFormatterGet.date(from: movie.release_date ?? "") {
+        if let date = dateFormatterGet.date(from: movie.releaseDate) {
             releaseLabel.text = dateFormatterPrint.string(from: date)
         }
     }
     
     private func setPoster(movie: Movies) {
-        let moviePosterString = Url.urlPoster + "\(movie.poster_path ?? "")"
+        let moviePosterString = Url.urlPoster + "\(movie.posterPath)"
         guard let url = URL(string: moviePosterString) else { return }
         posterImageView.load(url: url)
     }
@@ -203,105 +201,105 @@ private extension MovieTableViewCell {
         
         posterImageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            posterImageView.topAnchor.constraint(
-                equalTo: topAnchor,
-                constant: Constants.tenAnchor),
-            posterImageView.leadingAnchor.constraint(
-                equalTo: leadingAnchor,
-                constant: Constants.posterImageViewLeadingAnchor),
-            posterImageView.widthAnchor.constraint(
-                equalToConstant: Constants.posterImageViewWidthAnchor),
-            posterImageView.heightAnchor.constraint(
-                equalToConstant: Constants.posterImageViewHeightAnchor),
-            posterImageView.bottomAnchor.constraint(
-                equalTo: bottomAnchor, constant: Constants.posterImageViewBottomAnchor)])
+                                        posterImageView.topAnchor.constraint(
+                                            equalTo: topAnchor,
+                                            constant: Constants.tenAnchor),
+                                        posterImageView.leadingAnchor.constraint(
+                                            equalTo: leadingAnchor,
+                                            constant: Constants.posterImageViewLeadingAnchor),
+                                        posterImageView.widthAnchor.constraint(
+                                            equalToConstant: Constants.posterImageViewWidthAnchor),
+                                        posterImageView.heightAnchor.constraint(
+                                            equalToConstant: Constants.posterImageViewHeightAnchor),
+                                        posterImageView.bottomAnchor.constraint(
+                                            equalTo: bottomAnchor, constant: Constants.posterImageViewBottomAnchor)])
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(
-                equalTo: topAnchor,
-                constant: Constants.titleLabelTopAnchor),
-            titleLabel.leadingAnchor.constraint(
-                equalTo: posterImageView.trailingAnchor,
-                constant: Constants.twentyAnchor),
-            titleLabel.trailingAnchor.constraint(
-                equalTo: trailingAnchor,
-                constant: Constants.titleLabelTrailingAnchor),
-            titleLabel.heightAnchor.constraint(
-                equalToConstant: Constants.titleLabelHeightAnchor)])
+                                        titleLabel.topAnchor.constraint(
+                                            equalTo: topAnchor,
+                                            constant: Constants.titleLabelTopAnchor),
+                                        titleLabel.leadingAnchor.constraint(
+                                            equalTo: posterImageView.trailingAnchor,
+                                            constant: Constants.twentyAnchor),
+                                        titleLabel.trailingAnchor.constraint(
+                                            equalTo: trailingAnchor,
+                                            constant: Constants.titleLabelTrailingAnchor),
+                                        titleLabel.heightAnchor.constraint(
+                                            equalToConstant: Constants.titleLabelHeightAnchor)])
         
         releaseLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            releaseLabel.topAnchor.constraint(
-                equalTo: titleLabel.bottomAnchor,
-                constant: Constants.releaseLabelTopAnchor),
-            releaseLabel.trailingAnchor.constraint(
-                equalTo: titleLabel.trailingAnchor),
-            releaseLabel.heightAnchor.constraint(
-                equalToConstant: Constants.releaseLabelHeightAnchor),
-            releaseLabel.leadingAnchor.constraint(
-                equalTo: titleLabel.leadingAnchor)])
+                                        releaseLabel.topAnchor.constraint(
+                                            equalTo: titleLabel.bottomAnchor,
+                                            constant: Constants.releaseLabelTopAnchor),
+                                        releaseLabel.trailingAnchor.constraint(
+                                            equalTo: titleLabel.trailingAnchor),
+                                        releaseLabel.heightAnchor.constraint(
+                                            equalToConstant: Constants.releaseLabelHeightAnchor),
+                                        releaseLabel.leadingAnchor.constraint(
+                                            equalTo: titleLabel.leadingAnchor)])
         
         originalLanguageName.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            originalLanguageName.topAnchor.constraint(
-                equalTo: releaseLabel.bottomAnchor,
-                constant: Constants.twentyAnchor),
-            originalLanguageName.leadingAnchor.constraint(
-                equalTo: titleLabel.leadingAnchor),
-            originalLanguageName.widthAnchor.constraint(
-                equalToConstant: Constants.widthHundredAnchor),
-            originalLanguageName.heightAnchor.constraint(
-                equalToConstant: Constants.twentyAnchor)])
+                                        originalLanguageName.topAnchor.constraint(
+                                            equalTo: releaseLabel.bottomAnchor,
+                                            constant: Constants.twentyAnchor),
+                                        originalLanguageName.leadingAnchor.constraint(
+                                            equalTo: titleLabel.leadingAnchor),
+                                        originalLanguageName.widthAnchor.constraint(
+                                            equalToConstant: Constants.widthHundredAnchor),
+                                        originalLanguageName.heightAnchor.constraint(
+                                            equalToConstant: Constants.twentyAnchor)])
         
         flagImageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            flagImageView.leadingAnchor.constraint(
-                equalTo: originalLanguageName.leadingAnchor),
-            flagImageView.topAnchor.constraint(
-                equalTo: originalLanguageName.bottomAnchor,
-                constant: Constants.tenAnchor),
-            flagImageView.widthAnchor.constraint(
-                equalToConstant: Constants.flagImageWidthAnchor),
-            flagImageView.heightAnchor.constraint(
-                equalToConstant: Constants.sizeImage)])
+                                        flagImageView.leadingAnchor.constraint(
+                                            equalTo: originalLanguageName.leadingAnchor),
+                                        flagImageView.topAnchor.constraint(
+                                            equalTo: originalLanguageName.bottomAnchor,
+                                            constant: Constants.tenAnchor),
+                                        flagImageView.widthAnchor.constraint(
+                                            equalToConstant: Constants.flagImageWidthAnchor),
+                                        flagImageView.heightAnchor.constraint(
+                                            equalToConstant: Constants.sizeImage)])
         
         voteAverageName.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            voteAverageName.topAnchor.constraint(
-                equalTo: releaseLabel.bottomAnchor,
-                constant: Constants.twentyAnchor),
-            voteAverageName.trailingAnchor.constraint(
-                equalTo: titleLabel.trailingAnchor),
-            voteAverageName.widthAnchor.constraint(
-                equalToConstant: Constants.widthHundredAnchor),
-            voteAverageName.heightAnchor.constraint(
-                equalToConstant: Constants.twentyAnchor)])
+                                        voteAverageName.topAnchor.constraint(
+                                            equalTo: releaseLabel.bottomAnchor,
+                                            constant: Constants.twentyAnchor),
+                                        voteAverageName.trailingAnchor.constraint(
+                                            equalTo: titleLabel.trailingAnchor),
+                                        voteAverageName.widthAnchor.constraint(
+                                            equalToConstant: Constants.widthHundredAnchor),
+                                        voteAverageName.heightAnchor.constraint(
+                                            equalToConstant: Constants.twentyAnchor)])
         
         starImageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            starImageView.topAnchor.constraint(
-                equalTo: voteAverageName.bottomAnchor,
-                constant: Constants.tenAnchor),
-            starImageView.leadingAnchor.constraint(
-                equalTo: voteAverageName.leadingAnchor),
-            starImageView.heightAnchor.constraint(
-                equalToConstant: Constants.sizeImage),
-            starImageView.widthAnchor.constraint(
-                equalToConstant: Constants.sizeImage)])
+                                        starImageView.topAnchor.constraint(
+                                            equalTo: voteAverageName.bottomAnchor,
+                                            constant: Constants.tenAnchor),
+                                        starImageView.leadingAnchor.constraint(
+                                            equalTo: voteAverageName.leadingAnchor),
+                                        starImageView.heightAnchor.constraint(
+                                            equalToConstant: Constants.sizeImage),
+                                        starImageView.widthAnchor.constraint(
+                                            equalToConstant: Constants.sizeImage)])
         
         voteAverageLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            voteAverageLabel.topAnchor.constraint(
-                equalTo: voteAverageName.bottomAnchor,
-                constant: Constants.tenAnchor),
-            voteAverageLabel.leadingAnchor.constraint(
-                equalTo: starImageView.trailingAnchor,
-                constant: Constants.tenAnchor),
-            voteAverageLabel.heightAnchor.constraint(
-                equalToConstant: Constants.sizeImage),
-            voteAverageLabel.trailingAnchor.constraint(
-                equalTo: titleLabel.trailingAnchor)])
+                                        voteAverageLabel.topAnchor.constraint(
+                                            equalTo: voteAverageName.bottomAnchor,
+                                            constant: Constants.tenAnchor),
+                                        voteAverageLabel.leadingAnchor.constraint(
+                                            equalTo: starImageView.trailingAnchor,
+                                            constant: Constants.tenAnchor),
+                                        voteAverageLabel.heightAnchor.constraint(
+                                            equalToConstant: Constants.sizeImage),
+                                        voteAverageLabel.trailingAnchor.constraint(
+                                            equalTo: titleLabel.trailingAnchor)])
     }
 }
 

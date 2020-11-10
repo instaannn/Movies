@@ -7,18 +7,30 @@
 //
 
 struct MovieDetail: Decodable {
-    var id: Int?
-    var original_language: String?
-    var title: String?
-    var overview: String?
-    var vote_average: Double?
-    var release_date: String?
-    var poster_path: String?
-    var runtime: Int?
-    var genres: [Genres]?
+    let id: Int
+    let originalLanguage: String
+    let title: String
+    let overview: String
+    let voteAverage: Double
+    let releaseDate: String
+    let posterPath: String
+    let runtime: Int
+    let genres: [Genres]
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case originalLanguage = "original_language"
+        case title
+        case overview
+        case voteAverage = "vote_average"
+        case releaseDate = "release_date"
+        case posterPath = "poster_path"
+        case runtime
+        case genres
+    }
 }
 
 struct Genres: Decodable {
-    var id: Int?
-    var name: String?
+    let id: Int
+    let name: String
 }
